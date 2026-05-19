@@ -16,16 +16,21 @@
       --green:#2ce59b;
     }
 
-    *{ box-sizing:border-box; }
+    *{
+      box-sizing:border-box;
+    }
 
-    html, body{
+    html,
+    body{
       margin:0;
       background:var(--bg);
       color:var(--text);
       font-family:Inter,Arial,sans-serif;
     }
 
-    body{ padding:18px; }
+    body{
+      padding:18px;
+    }
 
     .topbar{
       display:flex;
@@ -63,7 +68,7 @@
       border-radius:16px;
       padding:12px 18px;
       color:var(--gold);
-      min-width:220px;
+      min-width:160px;
       text-align:center;
       font-size:16px;
       font-weight:400;
@@ -95,7 +100,7 @@
       grid-template-columns:repeat(6,1fr);
       border-top:1px solid var(--line);
       border-bottom:1px solid var(--line);
-      margin-bottom:22px;
+      margin-bottom:18px;
     }
 
     .kpi{
@@ -142,6 +147,80 @@
       color:#d9d9d9;
       font-size:13px;
       font-weight:300;
+      line-height:1.4;
+    }
+
+    .producer-strip{
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      margin-bottom:20px;
+      background:linear-gradient(180deg,#090909,#060606);
+    }
+
+    .producer-strip-title{
+      color:var(--gold);
+      font-size:16px;
+      padding:12px 18px;
+      border-bottom:1px solid var(--line);
+      font-weight:400;
+      text-align:center;
+    }
+
+    .top-producers-list{
+      width:100%;
+      max-width:760px;
+      margin:18px auto 20px;
+      display:flex;
+      flex-direction:column;
+      border:1px solid rgba(245,196,81,.08);
+      border-radius:14px;
+      overflow:hidden;
+    }
+
+    .producer-row{
+      display:grid;
+      grid-template-columns:52px minmax(0,1fr) 170px 110px;
+      align-items:center;
+      gap:16px;
+      padding:14px 18px;
+      border-bottom:1px solid rgba(245,196,81,.08);
+    }
+
+    .producer-row:last-child{
+      border-bottom:none;
+    }
+
+    .producer-rank{
+      text-align:center;
+      color:var(--gold);
+      font-size:12px;
+      font-weight:400;
+    }
+
+    .producer-name{
+      color:var(--text);
+      font-size:15px;
+      font-weight:300;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .producer-value{
+      color:#f5c451;
+      font-size:15px;
+      font-weight:400;
+      text-align:right;
+      white-space:nowrap;
+    }
+
+    .producer-deals{
+      color:#d9d9d9;
+      font-size:15px;
+      font-weight:400;
+      text-align:left;
+      white-space:nowrap;
     }
 
     .section{
@@ -160,7 +239,9 @@
       border-bottom:1px solid var(--line);
     }
 
-    .table-wrap{ overflow-x:auto; }
+    .table-wrap{
+      overflow-x:auto;
+    }
 
     table{
       width:100%;
@@ -195,7 +276,10 @@
       left:0;
       background:#090909;
       text-align:left;
-      min-width:260px;
+      width:1%;
+      white-space:nowrap;
+      padding-left:12px;
+      padding-right:18px;
       z-index:2;
     }
 
@@ -253,18 +337,103 @@
       white-space:pre-wrap;
       font-size:15px;
     }
+
+    @media(max-width:1400px){
+      .brand h1{
+        font-size:38px;
+      }
+
+      .premium-value{
+        font-size:28px;
+      }
+
+      .kpi-line{
+        grid-template-columns:repeat(3,1fr);
+      }
+    }
+
+    @media(max-width:900px){
+      .topbar{
+        flex-direction:column;
+      }
+
+      .top-right{
+        width:100%;
+        justify-content:space-between;
+      }
+
+      .kpi-line{
+        grid-template-columns:repeat(2,1fr);
+      }
+
+      .insight-grid{
+        grid-template-columns:1fr;
+      }
+
+      .producer-row{
+        grid-template-columns:46px minmax(0,1fr) 150px 100px;
+        gap:12px;
+      }
+    }
+
+    @media(max-width:640px){
+      body{
+        padding:12px;
+      }
+
+      .brand h1{
+        font-size:28px;
+      }
+
+      .subtitle{
+        font-size:14px;
+      }
+
+      .kpi-line{
+        grid-template-columns:1fr;
+      }
+
+      .kpi:not(:first-child){
+        border-left:none;
+        border-top:1px solid var(--line);
+      }
+
+      .top-right{
+        flex-direction:column;
+        width:100%;
+      }
+
+      .premium-box{
+        border-left:none;
+        padding-left:0;
+        border-top:1px solid var(--line);
+        padding-top:14px;
+      }
+
+      .producer-row{
+        grid-template-columns:36px minmax(0,1fr) 118px 84px;
+        gap:8px;
+        padding:12px 14px;
+      }
+
+      .producer-value,
+      .producer-deals{
+        font-size:13px;
+      }
+    }
   </style>
 </head>
 
 <body>
   <div class="topbar">
     <div class="brand">
-      <h1>👑 CEO SUMMARY DASHBOARD</h1>
+      <h1>👑 SUMMARY DASHBOARD</h1>
       <div class="subtitle">Executive Overview of Performance &amp; Acquisition Analysis</div>
     </div>
 
     <div class="top-right">
       <div class="month-filter">🗓️ May 2026 Report</div>
+
       <div class="premium-box">
         <div class="premium-label">Total Premium</div>
         <div class="premium-value" id="topPremium">—</div>
@@ -273,7 +442,16 @@
   </div>
 
   <div id="kpiLine" class="kpi-line">
-    <div class="kpi"><div class="loading">Loading summary cards...</div></div>
+    <div class="kpi">
+      <div class="loading">Loading summary cards...</div>
+    </div>
+  </div>
+
+  <div class="producer-strip">
+    <div class="producer-strip-title">🏆 Top 5 Producers This Month</div>
+    <div id="topProducersBox" class="top-producers-list">
+      <div class="loading">Loading top producers...</div>
+    </div>
   </div>
 
   <div class="section">
@@ -301,150 +479,223 @@
   <div class="section">
     <div class="section-title">🏆 Executive Insights</div>
     <div id="insightCards" class="insight-grid">
-      <div class="insight-card"><div class="loading">Loading insights...</div></div>
+      <div class="insight-card">
+        <div class="loading">Loading insights...</div>
+      </div>
     </div>
   </div>
 
-  <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBBq6Yn2uW4UycZ-uI9dJZKfoKTVzHBQARJg-XiF24pDQagPoslDFdDw4zb2JU6qJz/exec';
+<script>
+  const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyBBq6Yn2uW4UycZ-uI9dJZKfoKTVzHBQARJg-XiF24pDQagPoslDFdDw4zb2JU6qJz/exec';
 
-    loadData();
+  loadData();
 
-    function loadData() {
-      const callbackName = 'jsonp_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+  function loadData() {
+    const cbName = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
 
-      window[callbackName] = function(payload) {
-        try {
-          renderDashboard(payload || {});
-        } finally {
-          delete window[callbackName];
-          if (script.parentNode) script.parentNode.removeChild(script);
+    const script = document.createElement('script');
+
+    window[cbName] = function(payload) {
+      try {
+        renderDashboard(payload || {});
+      } finally {
+        delete window[cbName];
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
         }
-      };
-
-      const script = document.createElement('script');
-      script.src = APPS_SCRIPT_URL + '?mode=data&callback=' + callbackName;
-      script.onerror = function() {
-        showError(new Error('Failed to load dashboard data.'));
-        delete window[callbackName];
-      };
-      document.body.appendChild(script);
-    }
-
-    function renderDashboard(data){
-      renderTopPremium(data.summary || {});
-      renderKpis(data.summary || {});
-      renderTable('performanceTable', data.headers || [], data.performanceOverview || []);
-      renderTable('leadSourceTable', data.headers || [], data.acquisitionAnalysis || []);
-      renderInsights(data.insights || {});
-    }
-
-    function renderTopPremium(summary){
-      document.getElementById('topPremium').textContent = money(summary.totalRunningPremium || 0);
-    }
-
-    function renderKpis(summary){
-      const cards = [
-        { icon:'🤝', label:'Total Deals Closed', value:fmtInt(summary.totalDeals || 0), sub:'Deals' },
-        { icon:'🪙', label:'Total Running Premium', value:money(summary.totalRunningPremium || 0), sub:'Total' },
-        { icon:'👑', label:'Top MEC Agent', value:money(summary.topMec?.value || 0), sub:summary.topMec?.agent || '—' },
-        { icon:'🛡️', label:'Top Indemnity Agent', value:money(summary.topIndemnity?.value || 0), sub:summary.topIndemnity?.agent || '—' },
-        { icon:'↔️', label:'Top Cross Sale Agent', value:money(summary.topCrossSale?.value || 0), sub:summary.topCrossSale?.agent || '—' },
-        { icon:'📈', label:'Highest Ancillary %', value:pct(summary.topAncillary?.value || 0), sub:summary.topAncillary?.agent || '—' }
-      ];
-
-      document.getElementById('kpiLine').innerHTML =
-        cards.map(card => `
-          <div class="kpi">
-            <div class="kpi-icon">${card.icon}</div>
-            <div class="kpi-label">${escapeHtml(card.label)}</div>
-            <div class="kpi-value">${escapeHtml(card.value)}</div>
-            <div class="kpi-sub">${escapeHtml(card.sub)}</div>
-          </div>
-        `).join('');
-    }
-
-    function renderTable(id, headers, rows){
-      if(!headers.length || !rows.length){
-        document.getElementById(id).innerHTML =
-          '<tbody><tr><td class="loading">No data found.</td></tr></tbody>';
-        return;
       }
+    };
 
-      let html = '<thead><tr><th>Category</th>';
-      headers.forEach(h => {
-        html += `<th>${escapeHtml(h)}</th>`;
-      });
-      html += '</tr></thead><tbody>';
+    script.src = WEBAPP_URL + '?mode=data&callback=' + cbName;
+    script.onerror = function() {
+      showError(new Error('Failed to load dashboard data.'));
+      delete window[cbName];
+    };
 
-      rows.forEach(row => {
-        html += '<tr>';
-        html += `<td>${escapeHtml(row.category)}</td>`;
-        row.values.forEach(v => {
-          html += `<td>${escapeHtml(v || '—')}</td>`;
-        });
-        html += '</tr>';
-      });
+    document.body.appendChild(script);
+  }
 
-      html += '</tbody>';
-      document.getElementById(id).innerHTML = html;
-    }
+  function renderDashboard(data){
+    renderTopPremium(data.summary || {});
+    renderKpis(data.summary || {});
+    renderTopProducers(data.summary || {});
 
-    function renderInsights(insights){
-      const cards = [
-        { title:'Most Referral Agent', value:insights.bestReferral?.agent || '—', sub:(insights.bestReferral?.value || 0) + ' referrals' },
-        { title:'Best Acquisition Closer', value:insights.acquisitionCloser?.agent || '—', sub:(insights.acquisitionCloser?.closes || 0) + ' closes' },
-        { title:'Top Lead Source', value:insights.bestLeadSource?.source || '—', sub:(insights.bestLeadSource?.total || 0) + ' total leads' }
-      ];
+    renderTable('performanceTable', data.headers || [], data.performanceOverview || []);
+    renderTable('leadSourceTable', data.headers || [], data.acquisitionAnalysis || []);
+    renderInsights(data.insights || {});
+  }
 
-      document.getElementById('insightCards').innerHTML =
-        cards.map(card => `
-          <div class="insight-card">
-            <div class="insight-title">${escapeHtml(card.title)}</div>
-            <div class="insight-value">${escapeHtml(card.value)}</div>
-            <div class="insight-sub">${escapeHtml(card.sub)}</div>
+  function renderTopPremium(summary){
+    document.getElementById('topPremium').textContent =
+      money(summary.totalRunningPremium || 0);
+  }
+
+  function renderKpis(summary){
+    const cards = [
+      {
+        icon:'🤝',
+        label:'Total Deals Closed',
+        value:fmtInt(summary.totalDeals || 0),
+        sub:'Deals'
+      },
+      {
+        icon:'👑',
+        label:'Top MEC Agent',
+        value:money(summary.topMec?.value || 0),
+        sub:summary.topMec?.agent || '—'
+      },
+      {
+        icon:'🛡️',
+        label:'Top Indemnity Agent',
+        value:money(summary.topIndemnity?.value || 0),
+        sub:summary.topIndemnity?.agent || '—'
+      },
+      {
+        icon:'↔️',
+        label:'Top Cross Sale Agent',
+        value:money(summary.topCrossSale?.value || 0),
+        sub:summary.topCrossSale?.agent || '—'
+      },
+      {
+        icon:'🦷',
+        label:'Top Dental+ Agent',
+        value:money(summary.topDentalPlus?.value || 0),
+        sub:summary.topDentalPlus?.agent || '—'
+      },
+      {
+        icon:'🎁',
+        label:'Top Bundle Agent',
+        value:money(summary.topBundle?.value || 0),
+        sub:summary.topBundle?.agent || '—'
+      }
+    ];
+
+    document.getElementById('kpiLine').innerHTML =
+      cards.map(card => `
+        <div class="kpi">
+          <div class="kpi-icon">${card.icon}</div>
+          <div class="kpi-label">${escapeHtml(card.label)}</div>
+          <div class="kpi-value">${escapeHtml(card.value)}</div>
+          <div class="kpi-sub">${escapeHtml(card.sub)}</div>
+        </div>
+      `).join('');
+  }
+
+  function renderTopProducers(summary){
+    const items = summary.topProducers || [];
+
+    const rows = items.length
+      ? items.map((p, i) => `
+          <div class="producer-row">
+            <div class="producer-rank">#${i + 1}</div>
+            <div class="producer-name">${escapeHtml(p.agent || '—')}</div>
+            <div class="producer-value">${money(p.value || 0)}</div>
+            <div class="producer-deals">${fmtInt(p.deals || 0)} deals</div>
           </div>
-        `).join('');
+        `).join('')
+      : '<div class="loading">No top producers found.</div>';
+
+    document.getElementById('topProducersBox').innerHTML = rows;
+  }
+
+  function renderTable(id, headers, rows){
+    if(!headers.length || !rows.length){
+      document.getElementById(id).innerHTML =
+        '<tbody><tr><td class="loading">No data found.</td></tr></tbody>';
+      return;
     }
 
-    function money(v){
-      const n = Number(v || 0);
-      return '$' + n.toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 });
-    }
+    let html = '<thead><tr><th>Category</th>';
 
-    function pct(v){
-      const n = Number(v || 0);
-      return n.toFixed(2) + '%';
-    }
+    headers.forEach(h => {
+      html += `<th>${escapeHtml(h)}</th>`;
+    });
 
-    function fmtInt(v){
-      return Number(v || 0).toLocaleString();
-    }
+    html += '</tr></thead><tbody>';
 
-    function escapeHtml(text){
-      return String(text)
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;')
-        .replace(/'/g,'&#039;');
-    }
+    rows.forEach(row => {
+      html += '<tr>';
+      html += `<td>${escapeHtml(row.category)}</td>`;
 
-    function showError(err){
-      const msg = err && err.message ? err.message : String(err || 'Unknown error');
+      row.values.forEach(v => {
+        html += `<td>${escapeHtml(v || '—')}</td>`;
+      });
 
-      document.getElementById('kpiLine').innerHTML =
-        `<div class="error">${escapeHtml(msg)}</div>`;
+      html += '</tr>';
+    });
 
-      document.getElementById('performanceTable').innerHTML =
-        `<tbody><tr><td class="error">${escapeHtml(msg)}</td></tr></tbody>`;
+    html += '</tbody>';
+    document.getElementById(id).innerHTML = html;
+  }
 
-      document.getElementById('leadSourceTable').innerHTML =
-        `<tbody><tr><td class="error">${escapeHtml(msg)}</td></tr></tbody>`;
+  function renderInsights(insights){
+    const cards = [
+      {
+        title:'Most Referral Agent',
+        value:insights.bestReferral?.agent || '—',
+        sub:(insights.bestReferral?.value || 0) + ' referrals'
+      },
+      {
+        title:'Best Acquisition Closer',
+        value:insights.acquisitionCloser?.agent || '—',
+        sub:(insights.acquisitionCloser?.closes || 0) + ' closes'
+      },
+      {
+        title:'Top Lead Source',
+        value:insights.bestLeadSource?.source || '—',
+        sub:(insights.bestLeadSource?.total || 0) + ' total leads'
+      }
+    ];
 
-      document.getElementById('insightCards').innerHTML =
-        `<div class="error">${escapeHtml(msg)}</div>`;
-    }
-  </script>
+    document.getElementById('insightCards').innerHTML =
+      cards.map(card => `
+        <div class="insight-card">
+          <div class="insight-title">${escapeHtml(card.title)}</div>
+          <div class="insight-value">${escapeHtml(card.value)}</div>
+          <div class="insight-sub">${escapeHtml(card.sub)}</div>
+        </div>
+      `).join('');
+  }
+
+  function money(v){
+    const n = Number(v || 0);
+    return '$' + n.toLocaleString(undefined,{
+      minimumFractionDigits:2,
+      maximumFractionDigits:2
+    });
+  }
+
+  function fmtInt(v){
+    return Number(v || 0).toLocaleString();
+  }
+
+  function escapeHtml(text){
+    return String(text)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#039;');
+  }
+
+  function showError(err){
+    const msg = err && err.message ? err.message : String(err || 'Unknown error');
+
+    document.getElementById('kpiLine').innerHTML =
+      `<div class="error">${escapeHtml(msg)}</div>`;
+
+    document.getElementById('topProducersBox').innerHTML =
+      `<div class="error">${escapeHtml(msg)}</div>`;
+
+    document.getElementById('performanceTable').innerHTML =
+      `<tbody><tr><td class="error">${escapeHtml(msg)}</td></tr></tbody>`;
+
+    document.getElementById('leadSourceTable').innerHTML =
+      `<tbody><tr><td class="error">${escapeHtml(msg)}</td></tr></tbody>`;
+
+    document.getElementById('insightCards').innerHTML =
+      `<div class="error">${escapeHtml(msg)}</div>`;
+  }
+</script>
 </body>
 </html>
