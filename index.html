@@ -1,6 +1,5 @@
 <script>
-const CSV_URL =
-  'https://docs.google.com/spreadsheets/d/1EPAQYClEYRYohxkbZ93D6_SiZCv8H03TwpzQegYhktA/export?format=csv&gid=1168735828';
+const API_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE?mode=data';
 
 const moneyFmt = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -19,62 +18,6 @@ document.getElementById('reportDate').innerText =
     day: 'numeric'
   });
 
-function num(v) {
-  return Number(
-    String(v ?? '')
-      .replace(/[$,%]/g, '')
-      .replace(/,/g, '')
-      .trim()
-  ) || 0;
-}
-
-function parseCSV(text) {
-  const rows = [];
-  let row = [];
-  let cell = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    const next = text[i + 1];
-
-    if (ch === '"' && inQuotes && next === '"') {
-      cell += '"';
-      i++;
-      continue;
-    }
-
-    if (ch === '"') {
-      inQuotes = !inQuotes;
-      continue;
-    }
-
-    if (ch === ',' && !inQuotes) {
-      row.push(cell);
-      cell = '';
-      continue;
-    }
-
-    if ((ch === '\n' || ch === '\r') && !inQuotes) {
-      if (ch === '\r' && next === '\n') i++;
-      row.push(cell);
-      if (row.some(x => String(x).trim() !== '')) rows.push(row);
-      row = [];
-      cell = '';
-      continue;
-    }
-
-    cell += ch;
-  }
-
-  if (cell.length || row.length) {
-    row.push(cell);
-    if (row.some(x => String(x).trim() !== '')) rows.push(row);
-  }
-
-  return rows;
-}
-
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.innerText = value;
@@ -82,17 +25,15 @@ function setText(id, value) {
 
 function renderMetric(valueId, agentId, metric, type = 'money') {
   if (type === 'percent') {
-    setText(valueId, `${metric.value.toFixed(2)}%`);
+    setText(valueId, `${Number(metric.value || 0).toFixed(2)}%`);
   } else if (type === 'int') {
-    setText(valueId, intFmt.format(metric.value));
+    setText(valueId, intFmt.format(Number(metric.value || 0)));
   } else {
-    setText(valueId, moneyFmt.format(metric.value));
+    setText(valueId, moneyFmt.format(Number(metric.value || 0)));
   }
 
   const agentEl = document.getElementById(agentId);
-  if (agentEl) {
-    agentEl.innerText = metric.agent && metric.agent !== '-' ? `👑 ${metric.agent}` : '-';
-  }
+  if (agentEl) agentEl.innerText = metric.agent && metric.agent !== '-' ? `👑 ${metric.agent}` : '-';
 }
 
 function renderTableHead(targetId, agents, totalRunningRow) {
@@ -107,7 +48,7 @@ function renderTableHead(targetId, agents, totalRunningRow) {
           <div class="agent-rank">
             <div class="rank-circle">${idx + 1}</div>
             <div class="agent-name">${agent}</div>
-            <div class="agent-total">${moneyFmt.format(num(totalRunningRow[agent]))}</div>
+            <div class="agent-total">${moneyFmt.format(Number(totalRunningRow[agent] || 0))}</div>
           </div>
         </th>
       `).join('')}
@@ -127,123 +68,53 @@ function renderTableBody(targetId, rows, agents) {
   `).join('');
 }
 
-fetch(CSV_URL, { cache: 'no-store' })
-  .then(res => {
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.text();
-  })
-  .then(csv => {
-    const data = parseCSV(csv);
-    if (!data.length) throw new Error('CSV empty');
+function handleDashboardData(data) {
+  const agents = Array.isArray(data.agents) ? data.agents : [];
+  const productionRows = Array.isArray(data.productionRows) ? data.productionRows : [];
+  const leadRows = Array.isArray(data.leadRows) ? data.leadRows : [];
+  const metrics = data.metrics || {};
 
-    const headers = data[0];
-    const agentColumns = [];
+  const totalTeamPremium = Number(metrics.totalTeamPremium || 0);
+  const totalDeals = Number(metrics.totalDeals || 0);
 
-    for (let i = 1; i < headers.length; i++) {
-      const header = String(headers[i] || '').trim();
-      if (header) agentColumns.push({ name: header, index: i });
-    }
+  setText('teamPremium', moneyFmt.format(totalTeamPremium));
+  setText('dealsClosed', intFmt.format(totalDeals));
 
-    const rows = {};
-    for (let r = 1; r < data.length; r++) {
-      const label = String(data[r][0] || '').trim();
-      if (!label) continue;
+  renderMetric('topMec', 'topMecAgent', metrics.topMec || {}, 'money');
+  renderMetric('topIndemnity', 'topIndemnityAgent', metrics.topIndemnity || {}, 'money');
+  renderMetric('topRunning', 'topRunningAgent', metrics.topRunning || {}, 'money');
+  renderMetric('topCross', 'topCrossAgent', metrics.topCross || {}, 'money');
+  renderMetric('topDental', 'topDentalAgent', metrics.topDental || {}, 'money');
+  renderMetric('topAncillary', 'topAncillaryAgent', metrics.topAncillary || {}, 'percent');
 
-      rows[label] = {};
-      agentColumns.forEach(agent => {
-        rows[label][agent.name] = data[r][agent.index] ?? '';
+  const totalRunningRow = {};
+  productionRows.forEach(row => {
+    if (row.label === 'Total Running Premium') {
+      agents.forEach(agent => {
+        totalRunningRow[agent] = row.values && row.values[agent] ? row.values[agent] : '';
       });
     }
+  });
 
-    const totalRunningRow = rows['Total Running Premium'] || {};
+  renderTableHead('mainHead', agents, totalRunningRow);
+  renderTableBody('mainBody', productionRows, agents);
 
-    const activeAgents = agentColumns
-      .map(a => a.name)
-      .filter(agent => num(totalRunningRow[agent]) > 0);
+  renderTableHead('leadHead', agents, totalRunningRow);
+  renderTableBody('leadBody', leadRows, agents);
+}
 
-    const sortedAgents = [...activeAgents].sort((a, b) => {
-      return num(totalRunningRow[b]) - num(totalRunningRow[a]);
-    });
+function loadDashboard() {
+  window.handleDashboardData = handleDashboardData;
 
-    function getTop(rowName) {
-      const row = rows[rowName] || {};
-      let topAgent = '-';
-      let topValue = 0;
-
-      sortedAgents.forEach(agent => {
-        const val = num(row[agent]);
-        if (val > topValue) {
-          topValue = val;
-          topAgent = agent;
-        }
-      });
-
-      return { agent: topAgent, value: topValue };
-    }
-
-    const dealsClosed = rows['Deals Closed'] || {};
-
-    const totalTeamPremium = sortedAgents.reduce((sum, agent) => {
-      return sum + num(totalRunningRow[agent]);
-    }, 0);
-
-    const totalDeals = sortedAgents.reduce((sum, agent) => {
-      return sum + num(dealsClosed[agent]);
-    }, 0);
-
-    function makeRow(label) {
-      const row = rows[label] || {};
-      const values = {};
-      sortedAgents.forEach(agent => {
-        values[agent] = row[agent] || '';
-      });
-      return { label, values };
-    }
-
-    const productionRows = [
-      makeRow('ACA (Members)'),
-      makeRow('DENTAL/VISION'),
-      makeRow('Deals Closed'),
-      makeRow('MEC'),
-      makeRow('INDEMNITY'),
-      makeRow('SUPPLEMENTAL'),
-      makeRow('LIFE'),
-      makeRow('ACCIDENT'),
-      makeRow('Total Running Premium'),
-      makeRow('Cross Sale (Supp+Acc) only'),
-      makeRow('Running Premium w/o LIFE + Cross Sale (Supplemental+Accident)'),
-      makeRow('Dental+'),
-      makeRow('Ancillary(life+acc+ci)')
-    ];
-
-    const leadRows = [
-      makeRow('Referral Count'),
-      makeRow('Pivot IB'),
-      makeRow('AWL'),
-      makeRow('Joel Leads'),
-      makeRow('Americas Choice'),
-      makeRow('Health for mom')
-    ];
-
-    setText('teamPremium', moneyFmt.format(totalTeamPremium));
-    setText('dealsClosed', intFmt.format(totalDeals));
-
-    renderMetric('topMec', 'topMecAgent', getTop('MEC'), 'money');
-    renderMetric('topIndemnity', 'topIndemnityAgent', getTop('INDEMNITY'), 'money');
-    renderMetric('topRunning', 'topRunningAgent', getTop('Total Running Premium'), 'money');
-    renderMetric('topCross', 'topCrossAgent', getTop('Cross Sale (Supp+Acc) only'), 'money');
-    renderMetric('topDental', 'topDentalAgent', getTop('Dental+'), 'money');
-    renderMetric('topAncillary', 'topAncillaryAgent', getTop('Ancillary(life+acc+ci)'), 'percent');
-
-    renderTableHead('mainHead', sortedAgents, totalRunningRow);
-    renderTableBody('mainBody', productionRows, sortedAgents);
-
-    renderTableHead('leadHead', sortedAgents, totalRunningRow);
-    renderTableBody('leadBody', leadRows, sortedAgents);
-  })
-  .catch(err => {
-    console.error('Dashboard load failed:', err);
+  const s = document.createElement('script');
+  s.src = API_URL + '&callback=handleDashboardData&_=' + Date.now();
+  s.onerror = function () {
+    console.error('Failed to load dashboard data');
     setText('teamPremium', '$0.00');
     setText('dealsClosed', '0');
-  });
+  };
+  document.body.appendChild(s);
+}
+
+loadDashboard();
 </script>
