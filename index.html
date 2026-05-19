@@ -1,275 +1,122 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#050505" />
-  <title>Executive Sales Dashboard</title>
-  <style>
-    :root {
-      --bg: #050505;
-      --panel: #0b0b0b;
-      --text: #ffffff;
-      --muted: #9ca3af;
-      --border: rgba(255,255,255,0.08);
-      --accent: #22c55e;
-      --danger: #ef4444;
-    }
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbz6lppCFZDdn77OrXBx59lcWgMfvY-NLjX87BF1_vgyjFS4FrkVMxKpwkQ67-ea7wRj/exec?mode=data';
 
-    * { box-sizing: border-box; }
+const moneyFmt = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
 
-    html, body {
-      margin: 0;
-      width: 100%;
-      min-height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Inter, Arial, sans-serif;
-    }
+const intFmt = new Intl.NumberFormat('en-US');
 
-    .wrap {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+document.getElementById('reportDate').innerText =
+  new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 
-    .topbar {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
-    }
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = value;
+}
 
-    .title {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 700;
-    }
+function renderMetric(valueId, agentId, metric, type = 'money') {
+  if (type === 'percent') {
+    setText(valueId, `${Number(metric.value || 0).toFixed(2)}%`);
+  } else if (type === 'int') {
+    setText(valueId, intFmt.format(Number(metric.value || 0)));
+  } else {
+    setText(valueId, moneyFmt.format(Number(metric.value || 0)));
+  }
 
-    .subtitle {
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
+  const agentEl = document.getElementById(agentId);
+  if (agentEl) {
+    agentEl.innerText = metric.agent && metric.agent !== '-' ? `👑 ${metric.agent}` : '-';
+  }
+}
 
-    .content {
-      padding: 16px;
-      flex: 1;
-    }
+function renderTableHead(targetId, agents, totalRunningRow) {
+  const thead = document.getElementById(targetId);
+  if (!thead) return;
 
-    .dashboard-shell {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      min-height: calc(100vh - 110px);
-    }
+  thead.innerHTML = `
+    <tr>
+      <th class="sticky">Category</th>
+      ${agents.map((agent, idx) => `
+        <th>
+          <div class="agent-rank">
+            <div class="rank-circle">${idx + 1}</div>
+            <div class="agent-name">${agent}</div>
+            <div class="agent-total">${moneyFmt.format(Number(totalRunningRow[agent] || 0))}</div>
+          </div>
+        </th>
+      `).join('')}
+    </tr>
+  `;
+}
 
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
-    }
+function renderTableBody(targetId, rows, agents) {
+  const tbody = document.getElementById(targetId);
+  if (!tbody) return;
 
-    .card {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
-      background: rgba(255,255,255,0.02);
-    }
+  tbody.innerHTML = rows.map(row => `
+    <tr>
+      <td class="sticky">${row.label}</td>
+      ${agents.map(agent => `<td>${row.values[agent] ?? ''}</td>`).join('')}
+    </tr>
+  `).join('');
+}
 
-    .card .label {
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 6px;
-    }
+function handleDashboardData(data) {
+  try {
+    const agents = Array.isArray(data.agents) ? data.agents : [];
+    const productionRows = Array.isArray(data.productionRows) ? data.productionRows : [];
+    const leadRows = Array.isArray(data.leadRows) ? data.leadRows : [];
+    const metrics = data.metrics || {};
 
-    .card .value {
-      font-size: 28px;
-      font-weight: 800;
-      line-height: 1;
-    }
+    setText('teamPremium', moneyFmt.format(Number(metrics.totalTeamPremium || 0)));
+    setText('dealsClosed', intFmt.format(Number(metrics.totalDeals || 0)));
 
-    .table-wrap {
-      overflow: auto;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-    }
+    renderMetric('topMec', 'topMecAgent', metrics.topMec || {}, 'money');
+    renderMetric('topIndemnity', 'topIndemnityAgent', metrics.topIndemnity || {}, 'money');
+    renderMetric('topRunning', 'topRunningAgent', metrics.topRunning || {}, 'money');
+    renderMetric('topCross', 'topCrossAgent', metrics.topCross || {}, 'money');
+    renderMetric('topDental', 'topDentalAgent', metrics.topDental || {}, 'money');
+    renderMetric('topAncillary', 'topAncillaryAgent', metrics.topAncillary || {}, 'percent');
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 800px;
-    }
-
-    th, td {
-      padding: 12px 10px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    th {
-      position: sticky;
-      top: 0;
-      background: #111;
-      z-index: 1;
-    }
-
-    .status {
-      font-weight: 700;
-    }
-
-    .ok { color: var(--accent); }
-    .bad { color: var(--danger); }
-    .muted { color: var(--muted); }
-
-    .empty-state {
-      display: grid;
-      place-items: center;
-      min-height: 360px;
-      text-align: center;
-      color: var(--muted);
-      padding: 24px;
-    }
-
-    .empty-state h2 {
-      margin: 0 0 8px;
-      color: var(--text);
-      font-size: 18px;
-    }
-
-    .empty-state p {
-      margin: 0;
-      max-width: 560px;
-      line-height: 1.6;
-      font-size: 14px;
-    }
-
-    @media (max-width: 768px) {
-      .topbar, .content, .dashboard-shell { padding-left: 12px; padding-right: 12px; }
-      .title { font-size: 18px; }
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="topbar">
-      <h1 class="title">Executive Sales Dashboard</h1>
-      <p class="subtitle">Live sales performance view</p>
-    </div>
-
-    <div class="content">
-      <div class="dashboard-shell">
-        <div class="cards" id="cards"></div>
-        <div class="table-wrap" id="tableWrap"></div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    async function loadDashboard() {
-      try {
-        const res = await fetch('?mode=data');
-        const data = await res.json();
-
-        renderCards(data.rows);
-        renderTable(data.headers, data.rows);
-      } catch (err) {
-        document.getElementById('tableWrap').innerHTML = `
-          <div class="empty-state">
-            <div>
-              <h2>Failed to load dashboard</h2>
-              <p>${err.message}</p>
-            </div>
-          </div>`;
-      }
-    }
-
-    function renderCards(rows) {
-      const el = document.getElementById('cards');
-      const totalRows = rows.length;
-
-      let totalSales = 0;
-      let active = 0;
-
-      rows.forEach(r => {
-        const sales = Number(r.Sales || r.sales || 0);
-        if (!isNaN(sales)) totalSales += sales;
-
-        const status = String(r.Status || r.status || '').toLowerCase();
-        if (status === 'active' || status === 'approved') active++;
+    const totalRunningRow = {};
+    const runningRow = productionRows.find(r => r.label === 'Total Running Premium');
+    if (runningRow && runningRow.values) {
+      agents.forEach(agent => {
+        totalRunningRow[agent] = runningRow.values[agent] || '';
       });
-
-      el.innerHTML = `
-        <div class="card">
-          <div class="label">Total Records</div>
-          <div class="value">${totalRows}</div>
-        </div>
-        <div class="card">
-          <div class="label">Total Sales</div>
-          <div class="value">${totalSales.toLocaleString()}</div>
-        </div>
-        <div class="card">
-          <div class="label">Active / Approved</div>
-          <div class="value">${active}</div>
-        </div>
-      `;
     }
 
-    function renderTable(headers, rows) {
-      const wrap = document.getElementById('tableWrap');
+    renderTableHead('mainHead', agents, totalRunningRow);
+    renderTableBody('mainBody', productionRows, agents);
 
-      if (!rows || rows.length === 0) {
-        wrap.innerHTML = `
-          <div class="empty-state">
-            <div>
-              <h2>No data yet</h2>
-              <p>Kapag may laman na ang sheet, lalabas dito ang live records.</p>
-            </div>
-          </div>`;
-        return;
-      }
+    renderTableHead('leadHead', agents, totalRunningRow);
+    renderTableBody('leadBody', leadRows, agents);
+  } catch (err) {
+    console.error('Render failed:', err);
+  }
+}
 
-      const head = headers.map(h => `<th>${escapeHtml(String(h))}</th>`).join('');
-      const body = rows.map(row => {
-        const tds = headers.map(h => {
-          const val = row[h];
-          return `<td>${formatCell(h, val)}</td>`;
-        }).join('');
-        return `<tr>${tds}</tr>`;
-      }).join('');
+function loadDashboard() {
+  window.handleDashboardData = handleDashboardData;
 
-      wrap.innerHTML = `
-        <table>
-          <thead><tr>${head}</tr></thead>
-          <tbody>${body}</tbody>
-        </table>
-      `;
-    }
+  const s = document.createElement('script');
+  s.src = API_URL + '&callback=handleDashboardData&_=' + Date.now();
+  s.onerror = function () {
+    console.error('API load failed');
+    setText('teamPremium', '$0.00');
+    setText('dealsClosed', '0');
+  };
+  document.body.appendChild(s);
+}
 
-    function formatCell(header, value) {
-      const key = String(header).toLowerCase();
-      if (key.includes('status')) {
-        const v = String(value || '').toLowerCase();
-        const cls = v === 'approved' || v === 'active' ? 'ok' : (v ? 'bad' : 'muted');
-        return `<span class="status ${cls}">${escapeHtml(String(value ?? ''))}</span>`;
-      }
-      return escapeHtml(String(value ?? ''));
-    }
-
-    function escapeHtml(str) {
-      return str
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
-    loadDashboard();
-    setInterval(loadDashboard, 30000); // refresh every 30 sec
-  </script>
-</body>
-</html>
+loadDashboard();
+</script>
