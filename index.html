@@ -1,749 +1,564 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base target="_top">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <style>
 
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-    }
-
-    body{
-      background:#050505;
-      color:white;
-      font-family:'Inter',sans-serif;
-      padding:14px;
-    }
+<meta charset="UTF-8">
 
-    .container{
-      width:100%;
-      max-width:1920px;
-      margin:auto;
-    }
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+/>
 
-    .hero{
-      background:
-      linear-gradient(
-        135deg,
-        #0d0d0d,
-        #050505
-      );
-
-      border:1px solid rgba(212,175,55,.12);
-
-      border-radius:24px;
+<title>
+Executive Sales Dashboard
+</title>
 
-      padding:22px;
+<link rel="preconnect" href="https://fonts.googleapis.com">
 
-      margin-bottom:18px;
-    }
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    .hero-top{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:20px;
-    }
+<link
+href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+rel="stylesheet"
+/>
 
-    .hero-left{
-      display:flex;
-      align-items:center;
-      gap:20px;
-    }
+<style>
 
-    .icon-box{
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
 
-      width:110px;
-      height:110px;
+body{
+  background:#050505;
+  color:white;
+  font-family:'Inter',sans-serif;
+  padding:14px;
+}
 
-      border-radius:24px;
+.container{
+  width:100%;
+  max-width:1920px;
+  margin:auto;
+}
 
-      background:
-      linear-gradient(
-        145deg,
-        #171717,
-        #0b0b0b
-      );
+.hero{
 
-      border:1px solid rgba(212,175,55,.15);
+  background:
+  linear-gradient(
+    135deg,
+    #0d0d0d,
+    #050505
+  );
 
-      display:flex;
-      align-items:center;
-      justify-content:center;
+  border:
+  1px solid rgba(212,175,55,.12);
 
-      font-size:50px;
+  border-radius:24px;
 
-    }
+  padding:22px;
 
-    h1{
-      font-size:64px;
-      line-height:1;
-      font-weight:700;
-      color:#f1d06a;
-      letter-spacing:-2px;
-    }
+  margin-bottom:18px;
 
-    .subtitle{
-      margin-top:10px;
-      font-size:18px;
-      color:#b4b7bf;
-      font-weight:400;
-    }
+}
 
-    .report-date{
-      margin-top:8px;
-      font-size:14px;
-      color:#d4af37;
-    }
+.hero-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+}
 
-    .total-card{
+.hero-left{
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
 
-      min-width:340px;
+.icon-box{
 
-      background:
-      linear-gradient(
-        145deg,
-        #151515,
-        #080808
-      );
+  width:110px;
+  height:110px;
 
-      border:1px solid rgba(212,175,55,.15);
+  border-radius:24px;
 
-      border-radius:22px;
+  background:
+  linear-gradient(
+    145deg,
+    #171717,
+    #0b0b0b
+  );
 
-      padding:22px;
+  border:
+  1px solid rgba(212,175,55,.15);
 
-    }
+  display:flex;
+  align-items:center;
+  justify-content:center;
 
-    .total-label{
-      font-size:13px;
-      color:#d9d9d9;
-      text-transform:uppercase;
-      letter-spacing:.05em;
-    }
+  font-size:50px;
 
-    .total-value{
-      margin-top:10px;
-      font-size:42px;
-      font-weight:700;
-      color:#f1d06a;
-      letter-spacing:-1px;
-    }
+}
 
-    .kpi-grid{
+h1{
+  font-size:64px;
+  line-height:1;
+  font-weight:700;
+  color:#f1d06a;
+  letter-spacing:-2px;
+}
 
-      margin-top:18px;
+.subtitle{
+  margin-top:10px;
+  font-size:18px;
+  color:#b4b7bf;
+}
 
-      display:grid;
+.report-date{
+  margin-top:8px;
+  font-size:14px;
+  color:#d4af37;
+}
 
-      grid-template-columns:
-      repeat(7,1fr);
+.total-card{
 
-      gap:12px;
+  min-width:340px;
 
-    }
+  background:
+  linear-gradient(
+    145deg,
+    #151515,
+    #080808
+  );
 
-    .kpi-card{
+  border:
+  1px solid rgba(212,175,55,.15);
 
-      background:
-      linear-gradient(
-        180deg,
-        #111111,
-        #090909
-      );
+  border-radius:22px;
 
-      border-radius:20px;
+  padding:22px;
 
-      border:1px solid rgba(212,175,55,.08);
+}
 
-      padding:18px;
+.total-label{
+  font-size:13px;
+  color:#d9d9d9;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
 
-      min-height:145px;
+.total-value{
+  margin-top:10px;
+  font-size:42px;
+  font-weight:700;
+  color:#f1d06a;
+}
 
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
+.kpi-grid{
 
-    }
+  margin-top:18px;
 
-    .kpi-title{
-      color:#c9c9d4;
-      font-size:11px;
-      line-height:1.4;
-      font-weight:600;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-    }
+  display:grid;
 
-    .kpi-value{
-      font-size:22px;
-      font-weight:600;
-      color:#f1d06a;
-      line-height:1.1;
-      margin-top:10px;
-    }
+  grid-template-columns:
+  repeat(7,1fr);
 
-    .kpi-agent{
-      font-size:13px;
-      color:white;
-      font-weight:500;
-      margin-top:10px;
-    }
+  gap:12px;
 
-    .table-wrap{
+}
 
-      overflow:auto;
+.kpi-card{
 
-      border-radius:22px;
+  background:
+  linear-gradient(
+    180deg,
+    #111111,
+    #090909
+  );
 
-      border:1px solid rgba(212,175,55,.08);
+  border-radius:20px;
 
-      background:#0c0c0c;
+  border:
+  1px solid rgba(212,175,55,.08);
 
-      margin-bottom:18px;
+  padding:18px;
 
-    }
+  min-height:145px;
 
-    .section-title{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
 
-      padding:16px 20px;
+}
 
-      font-size:18px;
+.kpi-title{
+  color:#c9c9d4;
+  font-size:11px;
+  line-height:1.4;
+  font-weight:600;
+  text-transform:uppercase;
+}
 
-      color:#f1d06a;
+.kpi-value{
+  font-size:22px;
+  font-weight:600;
+  color:#f1d06a;
+  margin-top:10px;
+}
 
-      font-weight:700;
+.kpi-agent{
+  font-size:13px;
+  color:white;
+  margin-top:10px;
+}
 
-      border-bottom:
-      1px solid rgba(212,175,55,.08);
+.table-wrap{
 
-    }
+  overflow:auto;
 
-    table{
-      border-collapse:collapse;
-      width:100%;
-      min-width:1700px;
-    }
+  border-radius:22px;
 
-    thead{
-      background:#121212;
-    }
+  border:
+  1px solid rgba(212,175,55,.08);
 
-    th{
+  background:#0c0c0c;
 
-      padding:13px 12px;
+  margin-bottom:18px;
 
-      border-bottom:
-      1px solid rgba(212,175,55,.08);
+}
 
-      color:#f1d06a;
+.section-title{
 
-      font-size:11px;
+  padding:16px 20px;
 
-      text-transform:uppercase;
+  font-size:18px;
 
-      letter-spacing:.04em;
+  color:#f1d06a;
 
-      font-weight:600;
+  font-weight:700;
 
-      text-align:center;
+  border-bottom:
+  1px solid rgba(212,175,55,.08);
 
-    }
+}
 
-    td{
+table{
+  border-collapse:collapse;
+  width:100%;
+  min-width:1700px;
+}
 
-      padding:11px 12px;
+thead{
+  background:#121212;
+}
 
-      border-bottom:
-      1px solid rgba(255,255,255,.03);
+th{
 
-      text-align:center;
+  padding:13px 12px;
 
-      font-size:12px;
+  border-bottom:
+  1px solid rgba(212,175,55,.08);
 
-      font-weight:400;
+  color:#f1d06a;
 
-      white-space:nowrap;
+  font-size:11px;
 
-    }
+  text-transform:uppercase;
 
-    .sticky{
-      position:sticky;
-      left:0;
-      background:#0c0c0c;
-      z-index:2;
-      text-align:left !important;
-      min-width:260px;
-      font-weight:600;
-    }
+  text-align:center;
 
-    thead .sticky{
-      background:#121212;
-    }
+}
 
-    .money{
-      color:#79ffd1;
-      font-weight:500;
-    }
+td{
 
-    .percent{
-      color:#ffd36d;
-      font-weight:500;
-    }
+  padding:11px 12px;
 
-    .count{
-      color:#f5f5f5;
-    }
+  border-bottom:
+  1px solid rgba(255,255,255,.03);
 
-    .agent-rank{
-      display:flex;
-      flex-direction:column;
-      gap:5px;
-      align-items:center;
-    }
+  text-align:center;
 
-    .rank-circle{
+  font-size:12px;
 
-      width:28px;
-      height:28px;
+  white-space:nowrap;
 
-      border-radius:50%;
+}
 
-      background:#f1d06a;
+.sticky{
+  position:sticky;
+  left:0;
+  background:#0c0c0c;
+  z-index:2;
+  text-align:left !important;
+  min-width:260px;
+  font-weight:600;
+}
 
-      color:#000;
+thead .sticky{
+  background:#121212;
+}
 
-      font-size:12px;
+.money{
+  color:#79ffd1;
+}
 
-      font-weight:700;
+.percent{
+  color:#ffd36d;
+}
 
-      display:flex;
-      align-items:center;
-      justify-content:center;
+.count{
+  color:#f5f5f5;
+}
 
-    }
+.agent-rank{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  align-items:center;
+}
 
-    .agent-name{
-      font-size:12px;
-      font-weight:500;
-    }
+.rank-circle{
 
-    .agent-total{
-      font-size:11px;
-      color:#f1d06a;
-    }
+  width:28px;
+  height:28px;
 
-    .footer{
+  border-radius:50%;
 
-      border-radius:20px;
+  background:#f1d06a;
 
-      padding:18px;
+  color:#000;
 
-      text-align:center;
+  font-size:12px;
 
-      background:
-      linear-gradient(
-        90deg,
-        rgba(212,175,55,.05),
-        rgba(212,175,55,.01)
-      );
+  font-weight:700;
 
-      border:1px solid rgba(212,175,55,.08);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 
-      color:#f1d06a;
+}
 
-      font-size:16px;
+.agent-name{
+  font-size:12px;
+}
 
-      font-weight:600;
+.agent-total{
+  font-size:11px;
+  color:#f1d06a;
+}
 
-    }
+.footer{
 
-  </style>
+  border-radius:20px;
+
+  padding:18px;
+
+  text-align:center;
+
+  background:
+  linear-gradient(
+    90deg,
+    rgba(212,175,55,.05),
+    rgba(212,175,55,.01)
+  );
+
+  border:
+  1px solid rgba(212,175,55,.08);
+
+  color:#f1d06a;
+
+  font-size:16px;
+
+}
+
+</style>
+
 </head>
 
 <body>
 
 <div class="container">
 
-  <div class="hero">
+<div class="hero">
 
-    <div class="hero-top">
+<div class="hero-top">
 
-      <div class="hero-left">
+<div class="hero-left">
 
-        <div class="icon-box">
-          🏆
-        </div>
+<div class="icon-box">
+🏆
+</div>
 
-        <div>
+<div>
 
-          <h1>
-            Agent Running Sales
-          </h1>
+<h1>
+Agent Running Sales
+</h1>
 
-          <div class="subtitle">
-            Executive Summary
-          </div>
+<div class="subtitle">
+Executive Summary
+</div>
 
-          <div class="report-date" id="reportDate"></div>
+<div class="report-date" id="reportDate"></div>
 
-        </div>
+</div>
 
-      </div>
+</div>
 
-      <div class="total-card">
+<div class="total-card">
 
-        <div class="total-label">
-          Total Team Running Premium
-        </div>
+<div class="total-label">
+Total Team Running Premium
+</div>
 
-        <div class="total-value" id="teamPremium">
-          $0.00
-        </div>
+<div class="total-value" id="teamPremium">
+$0.00
+</div>
 
-      </div>
+</div>
 
-    </div>
+</div>
 
-    <div class="kpi-grid">
+<div class="kpi-grid">
 
-      <div class="kpi-card">
-        <div class="kpi-title">
-          Total Deals Closed
-        </div>
-        <div class="kpi-value" id="dealsClosed">
-          0
-        </div>
-        <div class="kpi-agent">
-          Team Total
-        </div>
-      </div>
+<div class="kpi-card">
+<div class="kpi-title">
+Total Deals Closed
+</div>
+<div class="kpi-value" id="dealsClosed">
+0
+</div>
+<div class="kpi-agent">
+Team Total
+</div>
+</div>
 
-      <div class="kpi-card">
-        <div class="kpi-title">
-          Top MEC Agent
-        </div>
-        <div class="kpi-value" id="topMec">
-          $0
-        </div>
-        <div class="kpi-agent" id="topMecAgent"></div>
-      </div>
+<div class="kpi-card">
+<div class="kpi-title">
+Top MEC Agent
+</div>
+<div class="kpi-value" id="topMec">
+$0
+</div>
+<div class="kpi-agent" id="topMecAgent"></div>
+</div>
 
-      <div class="kpi-card">
-        <div class="kpi-title">
-          Top INDEMNITY Agent
-        </div>
-        <div class="kpi-value" id="topIndemnity">
-          $0
-        </div>
-        <div class="kpi-agent" id="topIndemnityAgent"></div>
-      </div>
+<div class="kpi-card">
+<div class="kpi-title">
+Top INDEMNITY Agent
+</div>
+<div class="kpi-value" id="topIndemnity">
+$0
+</div>
+<div class="kpi-agent" id="topIndemnityAgent"></div>
+</div>
 
-      <div class="kpi-card">
-        <div class="kpi-title">
-          Top Running Premium
-        </div>
-        <div class="kpi-value" id="topRunning">
-          $0
-        </div>
-        <div class="kpi-agent" id="topRunningAgent"></div>
-      </div>
+<div class="kpi-card">
+<div class="kpi-title">
+Top Running Premium
+</div>
+<div class="kpi-value" id="topRunning">
+$0
+</div>
+<div class="kpi-agent" id="topRunningAgent"></div>
+</div>
 
-      <div class="kpi-card">
-        <div class="kpi-title">
-          Top Cross Sale Agent
-        </div>
-        <div class="kpi-value" id="topCross">
-          $0
-        </div>
-        <div class="kpi-agent" id="topCrossAgent"></div>
-      </div>
+<div class="kpi-card">
+<div class="kpi-title">
+Top Cross Sale Agent
+</div>
+<div class="kpi-value" id="topCross">
+$0
+</div>
+<div class="kpi-agent" id="topCrossAgent"></div>
+</div>
 
-      <div class="kpi-card">
-        <div class="kpi-title">
-          Top Dental+ Agent
-        </div>
-        <div class="kpi-value" id="topDental">
-          $0
-        </div>
-        <div class="kpi-agent" id="topDentalAgent"></div>
-      </div>
+<div class="kpi-card">
+<div class="kpi-title">
+Top Dental+ Agent
+</div>
+<div class="kpi-value" id="topDental">
+$0
+</div>
+<div class="kpi-agent" id="topDentalAgent"></div>
+</div>
 
-      <div class="kpi-card">
-        <div class="kpi-title">
-          Highest Ancillary %
-        </div>
-        <div class="kpi-value" id="topAncillary">
-          0%
-        </div>
-        <div class="kpi-agent" id="topAncillaryAgent"></div>
-      </div>
+<div class="kpi-card">
+<div class="kpi-title">
+Highest Ancillary %
+</div>
+<div class="kpi-value" id="topAncillary">
+0%
+</div>
+<div class="kpi-agent" id="topAncillaryAgent"></div>
+</div>
 
-    </div>
+</div>
 
-  </div>
+</div>
 
-  <div class="table-wrap">
+<div class="table-wrap">
 
-    <div class="section-title">
-      Production Overview
-    </div>
+<div class="section-title">
+Production Overview
+</div>
 
-    <table>
+<table>
 
-      <thead id="mainHead"></thead>
+<thead id="mainHead"></thead>
 
-      <tbody id="mainBody"></tbody>
+<tbody id="mainBody"></tbody>
 
-    </table>
+</table>
 
-  </div>
+</div>
 
-  <div class="table-wrap">
+<div class="table-wrap">
 
-    <div class="section-title">
-      Lead Sources
-    </div>
+<div class="section-title">
+Lead Sources
+</div>
 
-    <table>
+<table>
 
-      <thead id="leadHead"></thead>
+<thead id="leadHead"></thead>
 
-      <tbody id="leadBody"></tbody>
+<tbody id="leadBody"></tbody>
 
-    </table>
+</table>
 
-  </div>
+</div>
 
-  <div class="footer">
-    👑 Great work team! Keep pushing for higher production every weekend.
-  </div>
+<div class="footer">
+👑 Great work team! Keep pushing for higher production every weekend.
+</div>
 
 </div>
 
 <script>
 
-function money(v){
-
-  return Number(v || 0)
-    .toLocaleString(
-      'en-US',
-      {
-        style:'currency',
-        currency:'USD'
-      }
-    );
-
-}
-
-function formatCell(val){
-
-  const raw =
-    String(val ?? '').trim();
-
-  if(raw.includes('%')){
-
-    return `
-      <span class="percent">
-        ${raw}
-      </span>
-    `;
-
-  }
-
-  if(raw.includes('$')){
-
-    return `
-      <span class="money">
-        ${raw}
-      </span>
-    `;
-
-  }
-
-  return `
-    <span class="count">
-      ${raw}
-    </span>
-  `;
-
-}
+const CSV_URL =
+'https://docs.google.com/spreadsheets/d/1EPAQYClEYRYohxkbZ93D6_SiZCv8H03TwpzQegYhktA/edit?gid=1168735828#gid=1168735828';
 
 document.getElementById('reportDate').innerText =
-  new Date().toLocaleDateString(
-    'en-US',
-    {
-      weekday:'long',
-      year:'numeric',
-      month:'long',
-      day:'numeric'
-    }
-  );
-
-google.script.run
-.withSuccessHandler(renderDashboard)
-.getDashboardData();
-
-function renderDashboard(data){
-
-  const agents =
-    data.agents || [];
-
-  const productionRows =
-    data.productionRows || [];
-
-  const leadRows =
-    data.leadRows || [];
-
-  const metrics =
-    data.metrics || {};
-
-  document.getElementById('teamPremium').innerText =
-    money(metrics.totalTeamPremium || 0);
-
-  document.getElementById('dealsClosed').innerText =
-    Number(metrics.totalDeals || 0)
-      .toLocaleString('en-US');
-
-  function setMetric(id,val){
-
-    val = val || {
-      agent:'-',
-      value:0
-    };
-
-    document.getElementById(id).innerText =
-      money(val.value || 0);
-
-    document.getElementById(id+'Agent').innerText =
-      '👑 ' + val.agent;
-
-  }
-
-  setMetric('topMec',metrics.topMec);
-  setMetric('topIndemnity',metrics.topIndemnity);
-  setMetric('topRunning',metrics.topRunning);
-  setMetric('topCross',metrics.topCross);
-  setMetric('topDental',metrics.topDental);
-
-  document.getElementById('topAncillary').innerText =
-    Number(
-      metrics.topAncillary?.value || 0
-    ).toFixed(2) + '%';
-
-  document.getElementById('topAncillaryAgent').innerText =
-    '👑 ' +
-    (
-      metrics.topAncillary?.agent || '-'
-    );
-
-  const totalRow =
-    productionRows.find(
-      r =>
-      r.label.includes(
-        'Total Running Premium'
-      )
-    );
-
-  document.getElementById('mainHead').innerHTML = `
-    <tr>
-
-      <th class="sticky">
-        Category
-      </th>
-
-      ${agents.map((agent,index)=>`
-
-        <th>
-
-          <div class="agent-rank">
-
-            <div class="rank-circle">
-              ${index+1}
-            </div>
-
-            <div class="agent-name">
-              ${agent}
-            </div>
-
-            <div class="agent-total">
-              ${
-                totalRow?.values?.[agent] ||
-                '$0.00'
-              }
-            </div>
-
-          </div>
-
-        </th>
-
-      `).join('')}
-
-    </tr>
-  `;
-
-  document.getElementById('mainBody').innerHTML =
-    productionRows.map(row=>`
-
-      <tr>
-
-        <td class="sticky">
-          ${row.label}
-        </td>
-
-        ${agents.map(agent=>`
-
-          <td>
-            ${
-              formatCell(
-                row.values?.[agent]
-              )
-            }
-          </td>
-
-        `).join('')}
-
-      </tr>
-
-    `).join('');
-
-  document.getElementById('leadHead').innerHTML =
-    document.getElementById('mainHead').innerHTML;
-
-  document.getElementById('leadBody').innerHTML =
-    leadRows.map(row=>`
-
-      <tr>
-
-        <td class="sticky">
-          ${row.label}
-        </td>
-
-        ${agents.map(agent=>`
-
-          <td>
-            ${
-              formatCell(
-                row.values?.[agent]
-              )
-            }
-          </td>
-
-        `).join('')}
-
-      </tr>
-
-    `).join('');
-
+new Date().toLocaleDateString(
+'en-US',
+{
+weekday:'long',
+year:'numeric',
+month:'long',
+day:'numeric'
 }
+);
+
+fetch(CSV_URL)
+.then(res=>res.text())
+.then(csv=>{
+
+console.log(csv);
+
+});
 
 </script>
 
