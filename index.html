@@ -2,14 +2,6 @@
 const CSV_URL =
   'https://docs.google.com/spreadsheets/d/1EPAQYClEYRYohxkbZ93D6_SiZCv8H03TwpzQegYhktA/export?format=csv&gid=1168735828';
 
-document.getElementById('reportDate').innerText =
-  new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-
 const moneyFmt = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
@@ -19,9 +11,17 @@ const moneyFmt = new Intl.NumberFormat('en-US', {
 
 const intFmt = new Intl.NumberFormat('en-US');
 
+document.getElementById('reportDate').innerText =
+  new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
 function num(v) {
   return Number(
-    String(v || '')
+    String(v ?? '')
       .replace(/[$,%]/g, '')
       .replace(/,/g, '')
       .trim()
@@ -31,7 +31,7 @@ function num(v) {
 function parseCSV(text) {
   const rows = [];
   let row = [];
-  let cur = '';
+  let cell = '';
   let inQuotes = false;
 
   for (let i = 0; i < text.length; i++) {
@@ -39,7 +39,7 @@ function parseCSV(text) {
     const next = text[i + 1];
 
     if (ch === '"' && inQuotes && next === '"') {
-      cur += '"';
+      cell += '"';
       i++;
       continue;
     }
@@ -50,26 +50,26 @@ function parseCSV(text) {
     }
 
     if (ch === ',' && !inQuotes) {
-      row.push(cur);
-      cur = '';
+      row.push(cell);
+      cell = '';
       continue;
     }
 
     if ((ch === '\n' || ch === '\r') && !inQuotes) {
       if (ch === '\r' && next === '\n') i++;
-      row.push(cur);
-      if (row.some(cell => String(cell).trim() !== '')) rows.push(row);
+      row.push(cell);
+      if (row.some(x => String(x).trim() !== '')) rows.push(row);
       row = [];
-      cur = '';
+      cell = '';
       continue;
     }
 
-    cur += ch;
+    cell += ch;
   }
 
-  if (cur.length || row.length) {
-    row.push(cur);
-    if (row.some(cell => String(cell).trim() !== '')) rows.push(row);
+  if (cell.length || row.length) {
+    row.push(cell);
+    if (row.some(x => String(x).trim() !== '')) rows.push(row);
   }
 
   return rows;
@@ -90,7 +90,9 @@ function renderMetric(valueId, agentId, metric, type = 'money') {
   }
 
   const agentEl = document.getElementById(agentId);
-  if (agentEl) agentEl.innerText = metric.agent && metric.agent !== '-' ? `👑 ${metric.agent}` : '-';
+  if (agentEl) {
+    agentEl.innerText = metric.agent && metric.agent !== '-' ? `👑 ${metric.agent}` : '-';
+  }
 }
 
 function renderTableHead(targetId, agents, totalRunningRow) {
@@ -126,19 +128,20 @@ function renderTableBody(targetId, rows, agents) {
 }
 
 fetch(CSV_URL, { cache: 'no-store' })
-  .then(res => res.text())
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.text();
+  })
   .then(csv => {
     const data = parseCSV(csv);
-    if (!data.length) throw new Error('CSV is empty');
+    if (!data.length) throw new Error('CSV empty');
 
     const headers = data[0];
     const agentColumns = [];
 
     for (let i = 1; i < headers.length; i++) {
       const header = String(headers[i] || '').trim();
-      if (header) {
-        agentColumns.push({ name: header, index: i });
-      }
+      if (header) agentColumns.push({ name: header, index: i });
     }
 
     const rows = {};
@@ -191,11 +194,9 @@ fetch(CSV_URL, { cache: 'no-store' })
     function makeRow(label) {
       const row = rows[label] || {};
       const values = {};
-
       sortedAgents.forEach(agent => {
         values[agent] = row[agent] || '';
       });
-
       return { label, values };
     }
 
@@ -241,7 +242,7 @@ fetch(CSV_URL, { cache: 'no-store' })
     renderTableBody('leadBody', leadRows, sortedAgents);
   })
   .catch(err => {
-    console.error(err);
+    console.error('Dashboard load failed:', err);
     setText('teamPremium', '$0.00');
     setText('dealsClosed', '0');
   });
