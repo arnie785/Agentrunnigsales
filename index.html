@@ -1,7 +1,6 @@
 <script>
-const API_URL =
-  'https://script.google.com/macros/s/AKfycbz6lppCFZDdn77OrXBx59lcWgMfvY-NLjX87BF1_vgyjFS4FrkVMxKpwkQ67-ea7wRj/exec?mode=data';
-  
+const API_URL = 'https://script.google.com/macros/s/AKfycbz6lppCFZDdn77OrXBx59lcWgMfvY-NLjX87BF1_vgyjFS4FrkVMxKpwkQ67-ea7wRj/exec?mode=data';
+
 const moneyFmt = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
@@ -34,7 +33,9 @@ function renderMetric(valueId, agentId, metric, type = 'money') {
   }
 
   const agentEl = document.getElementById(agentId);
-  if (agentEl) agentEl.innerText = metric.agent && metric.agent !== '-' ? `👑 ${metric.agent}` : '-';
+  if (agentEl) {
+    agentEl.innerText = metric.agent && metric.agent !== '-' ? `👑 ${metric.agent}` : '-';
+  }
 }
 
 function renderTableHead(targetId, agents, totalRunningRow) {
@@ -70,38 +71,38 @@ function renderTableBody(targetId, rows, agents) {
 }
 
 function handleDashboardData(data) {
-  const agents = Array.isArray(data.agents) ? data.agents : [];
-  const productionRows = Array.isArray(data.productionRows) ? data.productionRows : [];
-  const leadRows = Array.isArray(data.leadRows) ? data.leadRows : [];
-  const metrics = data.metrics || {};
+  try {
+    const agents = Array.isArray(data.agents) ? data.agents : [];
+    const productionRows = Array.isArray(data.productionRows) ? data.productionRows : [];
+    const leadRows = Array.isArray(data.leadRows) ? data.leadRows : [];
+    const metrics = data.metrics || {};
 
-  const totalTeamPremium = Number(metrics.totalTeamPremium || 0);
-  const totalDeals = Number(metrics.totalDeals || 0);
+    setText('teamPremium', moneyFmt.format(Number(metrics.totalTeamPremium || 0)));
+    setText('dealsClosed', intFmt.format(Number(metrics.totalDeals || 0)));
 
-  setText('teamPremium', moneyFmt.format(totalTeamPremium));
-  setText('dealsClosed', intFmt.format(totalDeals));
+    renderMetric('topMec', 'topMecAgent', metrics.topMec || {}, 'money');
+    renderMetric('topIndemnity', 'topIndemnityAgent', metrics.topIndemnity || {}, 'money');
+    renderMetric('topRunning', 'topRunningAgent', metrics.topRunning || {}, 'money');
+    renderMetric('topCross', 'topCrossAgent', metrics.topCross || {}, 'money');
+    renderMetric('topDental', 'topDentalAgent', metrics.topDental || {}, 'money');
+    renderMetric('topAncillary', 'topAncillaryAgent', metrics.topAncillary || {}, 'percent');
 
-  renderMetric('topMec', 'topMecAgent', metrics.topMec || {}, 'money');
-  renderMetric('topIndemnity', 'topIndemnityAgent', metrics.topIndemnity || {}, 'money');
-  renderMetric('topRunning', 'topRunningAgent', metrics.topRunning || {}, 'money');
-  renderMetric('topCross', 'topCrossAgent', metrics.topCross || {}, 'money');
-  renderMetric('topDental', 'topDentalAgent', metrics.topDental || {}, 'money');
-  renderMetric('topAncillary', 'topAncillaryAgent', metrics.topAncillary || {}, 'percent');
-
-  const totalRunningRow = {};
-  productionRows.forEach(row => {
-    if (row.label === 'Total Running Premium') {
+    const totalRunningRow = {};
+    const runningRow = productionRows.find(r => r.label === 'Total Running Premium');
+    if (runningRow && runningRow.values) {
       agents.forEach(agent => {
-        totalRunningRow[agent] = row.values && row.values[agent] ? row.values[agent] : '';
+        totalRunningRow[agent] = runningRow.values[agent] || '';
       });
     }
-  });
 
-  renderTableHead('mainHead', agents, totalRunningRow);
-  renderTableBody('mainBody', productionRows, agents);
+    renderTableHead('mainHead', agents, totalRunningRow);
+    renderTableBody('mainBody', productionRows, agents);
 
-  renderTableHead('leadHead', agents, totalRunningRow);
-  renderTableBody('leadBody', leadRows, agents);
+    renderTableHead('leadHead', agents, totalRunningRow);
+    renderTableBody('leadBody', leadRows, agents);
+  } catch (err) {
+    console.error('Render failed:', err);
+  }
 }
 
 function loadDashboard() {
@@ -110,7 +111,7 @@ function loadDashboard() {
   const s = document.createElement('script');
   s.src = API_URL + '&callback=handleDashboardData&_=' + Date.now();
   s.onerror = function () {
-    console.error('Failed to load dashboard data');
+    console.error('API load failed');
     setText('teamPremium', '$0.00');
     setText('dealsClosed', '0');
   };
