@@ -1,122 +1,450 @@
-<script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbz6lppCFZDdn77OrXBx59lcWgMfvY-NLjX87BF1_vgyjFS4FrkVMxKpwkQ67-ea7wRj/exec?mode=data';
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Summary Dashboard</title>
 
-const moneyFmt = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2
-});
-
-const intFmt = new Intl.NumberFormat('en-US');
-
-document.getElementById('reportDate').innerText =
-  new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.innerText = value;
-}
-
-function renderMetric(valueId, agentId, metric, type = 'money') {
-  if (type === 'percent') {
-    setText(valueId, `${Number(metric.value || 0).toFixed(2)}%`);
-  } else if (type === 'int') {
-    setText(valueId, intFmt.format(Number(metric.value || 0)));
-  } else {
-    setText(valueId, moneyFmt.format(Number(metric.value || 0)));
-  }
-
-  const agentEl = document.getElementById(agentId);
-  if (agentEl) {
-    agentEl.innerText = metric.agent && metric.agent !== '-' ? `👑 ${metric.agent}` : '-';
-  }
-}
-
-function renderTableHead(targetId, agents, totalRunningRow) {
-  const thead = document.getElementById(targetId);
-  if (!thead) return;
-
-  thead.innerHTML = `
-    <tr>
-      <th class="sticky">Category</th>
-      ${agents.map((agent, idx) => `
-        <th>
-          <div class="agent-rank">
-            <div class="rank-circle">${idx + 1}</div>
-            <div class="agent-name">${agent}</div>
-            <div class="agent-total">${moneyFmt.format(Number(totalRunningRow[agent] || 0))}</div>
-          </div>
-        </th>
-      `).join('')}
-    </tr>
-  `;
-}
-
-function renderTableBody(targetId, rows, agents) {
-  const tbody = document.getElementById(targetId);
-  if (!tbody) return;
-
-  tbody.innerHTML = rows.map(row => `
-    <tr>
-      <td class="sticky">${row.label}</td>
-      ${agents.map(agent => `<td>${row.values[agent] ?? ''}</td>`).join('')}
-    </tr>
-  `).join('');
-}
-
-function handleDashboardData(data) {
-  try {
-    const agents = Array.isArray(data.agents) ? data.agents : [];
-    const productionRows = Array.isArray(data.productionRows) ? data.productionRows : [];
-    const leadRows = Array.isArray(data.leadRows) ? data.leadRows : [];
-    const metrics = data.metrics || {};
-
-    setText('teamPremium', moneyFmt.format(Number(metrics.totalTeamPremium || 0)));
-    setText('dealsClosed', intFmt.format(Number(metrics.totalDeals || 0)));
-
-    renderMetric('topMec', 'topMecAgent', metrics.topMec || {}, 'money');
-    renderMetric('topIndemnity', 'topIndemnityAgent', metrics.topIndemnity || {}, 'money');
-    renderMetric('topRunning', 'topRunningAgent', metrics.topRunning || {}, 'money');
-    renderMetric('topCross', 'topCrossAgent', metrics.topCross || {}, 'money');
-    renderMetric('topDental', 'topDentalAgent', metrics.topDental || {}, 'money');
-    renderMetric('topAncillary', 'topAncillaryAgent', metrics.topAncillary || {}, 'percent');
-
-    const totalRunningRow = {};
-    const runningRow = productionRows.find(r => r.label === 'Total Running Premium');
-    if (runningRow && runningRow.values) {
-      agents.forEach(agent => {
-        totalRunningRow[agent] = runningRow.values[agent] || '';
-      });
+  <style>
+    :root{
+      --bg:#040404;
+      --panel:#090909;
+      --gold:#f5c451;
+      --text:#f2f2f2;
+      --muted:#aaaaaa;
+      --line:rgba(245,196,81,.16);
+      --green:#2ce59b;
     }
 
-    renderTableHead('mainHead', agents, totalRunningRow);
-    renderTableBody('mainBody', productionRows, agents);
+    *{ box-sizing:border-box; }
 
-    renderTableHead('leadHead', agents, totalRunningRow);
-    renderTableBody('leadBody', leadRows, agents);
-  } catch (err) {
-    console.error('Render failed:', err);
-  }
-}
+    html, body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Inter,Arial,sans-serif;
+    }
 
-function loadDashboard() {
-  window.handleDashboardData = handleDashboardData;
+    body{ padding:18px; }
 
-  const s = document.createElement('script');
-  s.src = API_URL + '&callback=handleDashboardData&_=' + Date.now();
-  s.onerror = function () {
-    console.error('API load failed');
-    setText('teamPremium', '$0.00');
-    setText('dealsClosed', '0');
-  };
-  document.body.appendChild(s);
-}
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:24px;
+      margin-bottom:18px;
+    }
 
-loadDashboard();
-</script>
+    .brand h1{
+      margin:0;
+      color:var(--gold);
+      font-size:44px;
+      font-weight:300;
+      line-height:1;
+      letter-spacing:.4px;
+    }
+
+    .subtitle{
+      margin-top:10px;
+      color:#b6b6b6;
+      font-size:15px;
+      font-weight:300;
+    }
+
+    .top-right{
+      display:flex;
+      align-items:flex-start;
+      gap:22px;
+      margin-top:4px;
+    }
+
+    .month-filter{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px 18px;
+      color:var(--gold);
+      min-width:220px;
+      text-align:center;
+      font-size:16px;
+      font-weight:400;
+      background:linear-gradient(180deg,#0e0e0e,#070707);
+    }
+
+    .premium-box{
+      border-left:1px solid var(--line);
+      padding-left:22px;
+    }
+
+    .premium-label{
+      color:var(--gold);
+      font-size:14px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      margin-bottom:6px;
+    }
+
+    .premium-value{
+      color:var(--gold);
+      font-size:30px;
+      font-weight:400;
+      line-height:1;
+    }
+
+    .kpi-line{
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      border-top:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+      margin-bottom:22px;
+    }
+
+    .kpi{
+      min-height:180px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      text-align:center;
+      padding:20px 14px 16px;
+      gap:10px;
+      position:relative;
+    }
+
+    .kpi:not(:first-child){
+      border-left:1px solid var(--line);
+    }
+
+    .kpi-icon{
+      font-size:34px;
+      line-height:1;
+    }
+
+    .kpi-label{
+      color:#d6d6d6;
+      font-size:11px;
+      line-height:1.1;
+      font-weight:300;
+      text-transform:uppercase;
+      letter-spacing:.3px;
+    }
+
+    .kpi-value{
+      color:var(--gold);
+      font-size:28px;
+      line-height:1;
+      font-weight:400;
+      padding-bottom:10px;
+      border-bottom:1px solid rgba(245,196,81,.45);
+      min-width:70%;
+    }
+
+    .kpi-sub{
+      color:#d9d9d9;
+      font-size:13px;
+      font-weight:300;
+    }
+
+    .section{
+      background:linear-gradient(180deg,#090909,#060606);
+      border:1px solid var(--line);
+      border-radius:22px;
+      overflow:hidden;
+      margin-bottom:20px;
+    }
+
+    .section-title{
+      color:var(--gold);
+      font-size:20px;
+      font-weight:400;
+      padding:14px 18px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .table-wrap{ overflow-x:auto; }
+
+    table{
+      width:100%;
+      min-width:1500px;
+      border-collapse:collapse;
+    }
+
+    thead th{
+      background:#090909;
+      color:#e4e4e4;
+      font-size:13px;
+      font-weight:300;
+      padding:14px 12px;
+      border-bottom:1px solid var(--line);
+      border-right:1px solid var(--line);
+      text-align:center;
+    }
+
+    tbody td{
+      padding:12px 12px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      border-right:1px solid rgba(245,196,81,.08);
+      text-align:center;
+      font-size:13px;
+      font-weight:300;
+      white-space:nowrap;
+    }
+
+    tbody td:first-child,
+    thead th:first-child{
+      position:sticky;
+      left:0;
+      background:#090909;
+      text-align:left;
+      min-width:260px;
+      z-index:2;
+    }
+
+    tbody tr:hover td{
+      background:rgba(245,196,81,.03);
+    }
+
+    .insight-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+    }
+
+    .insight-card{
+      padding:16px 18px;
+      min-height:125px;
+    }
+
+    .insight-card:not(:last-child){
+      border-right:1px solid var(--line);
+    }
+
+    .insight-title{
+      color:#d4d4d4;
+      font-size:11px;
+      text-transform:uppercase;
+      margin-bottom:12px;
+      font-weight:300;
+      letter-spacing:.4px;
+    }
+
+    .insight-value{
+      color:var(--gold);
+      font-size:26px;
+      line-height:1;
+      margin-bottom:8px;
+      font-weight:400;
+    }
+
+    .insight-sub{
+      color:#e0e0e0;
+      font-size:13px;
+      font-weight:300;
+    }
+
+    .loading{
+      color:#b8b8b8;
+      font-size:15px;
+      padding:18px;
+      font-weight:300;
+    }
+
+    .error{
+      color:#ff8b8b;
+      padding:18px;
+      white-space:pre-wrap;
+      font-size:15px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <h1>👑 CEO SUMMARY DASHBOARD</h1>
+      <div class="subtitle">Executive Overview of Performance &amp; Acquisition Analysis</div>
+    </div>
+
+    <div class="top-right">
+      <div class="month-filter">🗓️ May 2026 Report</div>
+      <div class="premium-box">
+        <div class="premium-label">Total Premium</div>
+        <div class="premium-value" id="topPremium">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="kpiLine" class="kpi-line">
+    <div class="kpi"><div class="loading">Loading summary cards...</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 Performance Overview</div>
+    <div class="table-wrap">
+      <table id="performanceTable">
+        <tbody>
+          <tr><td class="loading">Loading performance data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎯 Acquisition Analysis</div>
+    <div class="table-wrap">
+      <table id="leadSourceTable">
+        <tbody>
+          <tr><td class="loading">Loading acquisition data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏆 Executive Insights</div>
+    <div id="insightCards" class="insight-grid">
+      <div class="insight-card"><div class="loading">Loading insights...</div></div>
+    </div>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBBq6Yn2uW4UycZ-uI9dJZKfoKTVzHBQARJg-XiF24pDQagPoslDFdDw4zb2JU6qJz/exec';
+
+    loadData();
+
+    function loadData() {
+      const callbackName = 'jsonp_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+
+      window[callbackName] = function(payload) {
+        try {
+          renderDashboard(payload || {});
+        } finally {
+          delete window[callbackName];
+          if (script.parentNode) script.parentNode.removeChild(script);
+        }
+      };
+
+      const script = document.createElement('script');
+      script.src = APPS_SCRIPT_URL + '?mode=data&callback=' + callbackName;
+      script.onerror = function() {
+        showError(new Error('Failed to load dashboard data.'));
+        delete window[callbackName];
+      };
+      document.body.appendChild(script);
+    }
+
+    function renderDashboard(data){
+      renderTopPremium(data.summary || {});
+      renderKpis(data.summary || {});
+      renderTable('performanceTable', data.headers || [], data.performanceOverview || []);
+      renderTable('leadSourceTable', data.headers || [], data.acquisitionAnalysis || []);
+      renderInsights(data.insights || {});
+    }
+
+    function renderTopPremium(summary){
+      document.getElementById('topPremium').textContent = money(summary.totalRunningPremium || 0);
+    }
+
+    function renderKpis(summary){
+      const cards = [
+        { icon:'🤝', label:'Total Deals Closed', value:fmtInt(summary.totalDeals || 0), sub:'Deals' },
+        { icon:'🪙', label:'Total Running Premium', value:money(summary.totalRunningPremium || 0), sub:'Total' },
+        { icon:'👑', label:'Top MEC Agent', value:money(summary.topMec?.value || 0), sub:summary.topMec?.agent || '—' },
+        { icon:'🛡️', label:'Top Indemnity Agent', value:money(summary.topIndemnity?.value || 0), sub:summary.topIndemnity?.agent || '—' },
+        { icon:'↔️', label:'Top Cross Sale Agent', value:money(summary.topCrossSale?.value || 0), sub:summary.topCrossSale?.agent || '—' },
+        { icon:'📈', label:'Highest Ancillary %', value:pct(summary.topAncillary?.value || 0), sub:summary.topAncillary?.agent || '—' }
+      ];
+
+      document.getElementById('kpiLine').innerHTML =
+        cards.map(card => `
+          <div class="kpi">
+            <div class="kpi-icon">${card.icon}</div>
+            <div class="kpi-label">${escapeHtml(card.label)}</div>
+            <div class="kpi-value">${escapeHtml(card.value)}</div>
+            <div class="kpi-sub">${escapeHtml(card.sub)}</div>
+          </div>
+        `).join('');
+    }
+
+    function renderTable(id, headers, rows){
+      if(!headers.length || !rows.length){
+        document.getElementById(id).innerHTML =
+          '<tbody><tr><td class="loading">No data found.</td></tr></tbody>';
+        return;
+      }
+
+      let html = '<thead><tr><th>Category</th>';
+      headers.forEach(h => {
+        html += `<th>${escapeHtml(h)}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      rows.forEach(row => {
+        html += '<tr>';
+        html += `<td>${escapeHtml(row.category)}</td>`;
+        row.values.forEach(v => {
+          html += `<td>${escapeHtml(v || '—')}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody>';
+      document.getElementById(id).innerHTML = html;
+    }
+
+    function renderInsights(insights){
+      const cards = [
+        { title:'Most Referral Agent', value:insights.bestReferral?.agent || '—', sub:(insights.bestReferral?.value || 0) + ' referrals' },
+        { title:'Best Acquisition Closer', value:insights.acquisitionCloser?.agent || '—', sub:(insights.acquisitionCloser?.closes || 0) + ' closes' },
+        { title:'Top Lead Source', value:insights.bestLeadSource?.source || '—', sub:(insights.bestLeadSource?.total || 0) + ' total leads' }
+      ];
+
+      document.getElementById('insightCards').innerHTML =
+        cards.map(card => `
+          <div class="insight-card">
+            <div class="insight-title">${escapeHtml(card.title)}</div>
+            <div class="insight-value">${escapeHtml(card.value)}</div>
+            <div class="insight-sub">${escapeHtml(card.sub)}</div>
+          </div>
+        `).join('');
+    }
+
+    function money(v){
+      const n = Number(v || 0);
+      return '$' + n.toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 });
+    }
+
+    function pct(v){
+      const n = Number(v || 0);
+      return n.toFixed(2) + '%';
+    }
+
+    function fmtInt(v){
+      return Number(v || 0).toLocaleString();
+    }
+
+    function escapeHtml(text){
+      return String(text)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#039;');
+    }
+
+    function showError(err){
+      const msg = err && err.message ? err.message : String(err || 'Unknown error');
+
+      document.getElementById('kpiLine').innerHTML =
+        `<div class="error">${escapeHtml(msg)}</div>`;
+
+      document.getElementById('performanceTable').innerHTML =
+        `<tbody><tr><td class="error">${escapeHtml(msg)}</td></tr></tbody>`;
+
+      document.getElementById('leadSourceTable').innerHTML =
+        `<tbody><tr><td class="error">${escapeHtml(msg)}</td></tr></tbody>`;
+
+      document.getElementById('insightCards').innerHTML =
+        `<div class="error">${escapeHtml(msg)}</div>`;
+    }
+  </script>
+</body>
+</html>
