@@ -488,11 +488,22 @@
 <script>
   const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbzyeRARulFh3NyraYptUJdDqYpp8NwCH8KotkRgRaTK5SykxVYNDcqwflJOA0daVyhF/exec';
 
+  const ACQUISITION_ORDER = [
+    'Referral Count',
+    'Pivot IB',
+    'AWL',
+    'TBB Funnels',
+    'Joel Leads',
+    'Americas Choice',
+    'Health for mom'
+  ];
+
+  const ACQUISITION_SET = new Set(ACQUISITION_ORDER.map(normalizeCategory));
+
   loadData();
 
   function loadData() {
     const cbName = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-
     const script = document.createElement('script');
 
     window[cbName] = function(payload) {
@@ -516,13 +527,50 @@
   }
 
   function renderDashboard(data){
+    const prepared = splitDashboardRows(data || {});
+
     renderTopPremium(data.summary || {});
     renderKpis(data.summary || {});
     renderTopProducers(data.summary || {});
 
-    renderTable('performanceTable', data.headers || [], data.performanceOverview || []);
-    renderTable('leadSourceTable', data.headers || [], data.acquisitionAnalysis || []);
+    renderTable('performanceTable', data.headers || [], prepared.performanceOverview);
+    renderTable('leadSourceTable', data.headers || [], prepared.acquisitionAnalysis);
     renderInsights(data.insights || {});
+  }
+
+  function splitDashboardRows(data) {
+    const performanceOverview = Array.isArray(data.performanceOverview) ? data.performanceOverview : [];
+    const acquisitionAnalysis = Array.isArray(data.acquisitionAnalysis) ? data.acquisitionAnalysis : [];
+
+    const combined = [...performanceOverview, ...acquisitionAnalysis];
+    const acquisitionMap = new Map();
+    const performanceRows = [];
+
+    combined.forEach(row => {
+      if (!row || !row.category) return;
+
+      const key = normalizeCategory(row.category);
+      if (ACQUISITION_SET.has(key)) {
+        if (!acquisitionMap.has(key)) {
+          acquisitionMap.set(key, row);
+        }
+      } else {
+        performanceRows.push(row);
+      }
+    });
+
+    const acquisitionRows = ACQUISITION_ORDER
+      .map(name => acquisitionMap.get(normalizeCategory(name)))
+      .filter(Boolean);
+
+    return {
+      performanceOverview: performanceRows,
+      acquisitionAnalysis: acquisitionRows
+    };
+  }
+
+  function normalizeCategory(value) {
+    return String(value || '').trim().toLowerCase();
   }
 
   function renderTopPremium(summary){
